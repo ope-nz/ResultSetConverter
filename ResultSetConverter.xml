@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <doclet-version-NOT-library-version>1.07</doclet-version-NOT-library-version>
+    <class>
+        <name>nz.ope.resultsetconverter.ResultSetConverter</name>
+        <shortname>ResultSetConverter</shortname>
+        <owner>process</owner>
+        <method>
+            <name>ToMap</name>
+            <comment>Converts a JDBC ResultSet to a Map, with the value of the first column
+ used as the key, and a Map of the columns used as the value.
+ The column types of the columns are used to determine the types of the
+ keys and values to be added to the Map (e.g. Integer for Types.INTEGER,
+ etc.).
+ If the column types are not recognized, the values are added as Strings.
+ 
+ Example output:
+ {"John": {"Name": "John", "Age": 30}, "Jane": {"Name": "Jane", "Age": 25}}
+rs: The ResultSet to convert.
+Return type: @return:A Map containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.Map</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToDataSeries</name>
+            <comment>Converts a JDBC ResultSet into a Map containing two ArrayLists: one for
+ series values
+ and another for data values. The first column's values are added to the
+ series ArrayList,
+ while the second column's values are added to the data ArrayList.
+ 
+ Example output:
+ {
+ "series": [series_value1, series_value2, ...],
+ "data": [data_value1, data_value2, ...]
+ }
+rs: The ResultSet to convert.
+Return type: @return:A Map with keys "series" and "data", containing ArrayLists of the
+         respective values.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.Map</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToMap_KVP</name>
+            <comment>Converts a JDBC ResultSet to a Map, with the first column's values used
+ as the keys, and the second column's values used as the values.
+ The column types of the columns are used to determine the types of the
+ keys and values to be added to the Map (e.g. Integer for Types.INTEGER,
+ etc.).
+ If the column types are not recognized, the values are added as Strings.
+ 
+ Example output:
+ {"John": 30, "Jane": 25}
+rs: The ResultSet to convert.
+Return type: @return:A Map containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.Map</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToMap_IVP</name>
+            <comment>Converts a JDBC ResultSet to a Map, with the row number as the key
+ and the value of the first column as the value.
+ The column type of the first column is used to determine the type of the
+ value to be added to the Map (e.g. Integer for Types.INTEGER, etc.).
+ If the column type is not recognized, the value is added as a String.
+ 
+ Example output:
+ {1: "John", 2: "Jane"}
+rs: The ResultSet to convert.
+Return type: @return:A Map containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.Map</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToListOfMaps</name>
+            <comment>Converts a JDBC ResultSet to an ArrayList of Maps, with the column names used
+ as the keys in the Map.
+ The column type is used to determine the type of the value to be added to the
+ Map (e.g. Integer for Types.INTEGER, etc.).
+ If the column type is not recognized, the value is added as a String.
+ 
+ Example output:
+ [{"Name": "John", "Age": 30}, {"Name": "Jane", "Age": 25}]
+rs: The ResultSet to convert.
+Return type: @return:An ArrayList containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.List</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>GetFieldTypes</name>
+            <comment>Returns a Map containing the column names from the ResultSet as the keys, and
+ the corresponding JDBC type name as the value.
+ 
+ Example output:
+ {"Name": "VARCHAR", "Age": "INTEGER"}
+rs: The ResultSet to convert.
+Return type: @return:A Map containing the column names and their corresponding JDBC type
+         names.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.Map</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>GetFieldList</name>
+            <comment>Returns a List containing the column names from the ResultSet.
+ 
+ Example output:
+ ["Name", "Age"]
+rs: The ResultSet to convert.
+Return type: @return:A List containing the column names.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.List</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToList</name>
+            <comment>Converts a JDBC ResultSet to an ArrayList, with the first column's
+ values used as the elements in the ArrayList.
+ The column type of the first column is used to determine the type of the
+ value to be added to the ArrayList (e.g. Integer for Types.INTEGER, etc.).
+ If the column type is not recognized, the value is added as a String.
+ 
+ Example output:
+ ["John", "Jane"]
+rs: The ResultSet to convert.
+Return type: @return:An ArrayList containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.List</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+        </method>
+        <method>
+            <name>ToListOfLists</name>
+            <comment>Converts a JDBC ResultSet to an ArrayList of ArrayLists, with the first
+ ArrayList containing the column names (if includeHeader is true), and
+ subsequent ArrayLists containing the values from each row.
+ The column type is used to determine the type of the value to be added to the
+ ArrayList (e.g. Integer for Types.INTEGER, etc.).
+ If the column type is not recognized, the value is added as a String.
+ 
+ Example output:
+ [["Name", "Age"], ["John", 30], ["Jane", 25]]
+rs: The ResultSet to convert.
+includeHeader: If true, the first ArrayList will contain the
+                      column names.
+Return type: @return:An ArrayList containing the values from the ResultSet.</comment>
+            <returntype>anywheresoftware.b4a.objects.collections.List</returntype>
+            <parameter>
+                <name>rs</name>
+                <type>java.sql.ResultSet</type>
+            </parameter>
+            <parameter>
+                <name>includeHeader</name>
+                <type>boolean</type>
+            </parameter>
+        </method>
+    </class>
+    <version>1.0</version>
+</root>
