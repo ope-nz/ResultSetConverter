@@ -10,10 +10,7 @@ import anywheresoftware.b4a.objects.collections.Map;
 import anywheresoftware.b4a.objects.collections.List;
 
 import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.Map;
 
-//import org.json.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
@@ -36,6 +33,9 @@ public class ResultSetConverter {
     public static Map GetFieldTypes(ResultSet rs) {
         Map Result = new Map();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -65,6 +65,9 @@ public class ResultSetConverter {
         List Result = new List();
         Result.Initialize();
 
+        if (VerifyResultSet(rs) == false)
+            return Result;
+
         try {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
@@ -82,8 +85,10 @@ public class ResultSetConverter {
     /**
      * Converts a JDBC ResultSet to an ArrayList of Maps, with the column names used
      * as the keys in the Map.
+     * 
      * The column type is used to determine the type of the value to be added to the
      * Map (e.g. Integer for Types.INTEGER, etc.).
+     * 
      * If the column type is not recognized, the value is added as a String.
      * 
      * Example output:
@@ -95,6 +100,9 @@ public class ResultSetConverter {
     public static List ToListOfMaps(ResultSet rs) {
         List Result = new List();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -124,8 +132,10 @@ public class ResultSetConverter {
      * Converts a JDBC ResultSet to an ArrayList of ArrayLists, with the first
      * ArrayList containing the column names (if includeHeader is true), and
      * subsequent ArrayLists containing the values from each row.
+     * 
      * The column type is used to determine the type of the value to be added to the
      * ArrayList (e.g. Integer for Types.INTEGER, etc.).
+     * 
      * If the column type is not recognized, the value is added as a String.
      * 
      * Example output:
@@ -140,12 +150,10 @@ public class ResultSetConverter {
         List Result = new List();
         Result.Initialize();
 
-        try {
-            if (!rs.isBeforeFirst()) {
-                Common.Log("Warning: ResultSet has already been read or is empty.");
-                return Result;
-            }
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
+        try {
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
 
@@ -177,9 +185,12 @@ public class ResultSetConverter {
     /**
      * Converts a JDBC ResultSet to an ArrayList, with the first column's
      * values used as the elements in the ArrayList.
+     * 
      * The column type of the first column is used to determine the type of the
      * value to be added to the ArrayList (e.g. Integer for Types.INTEGER, etc.).
      * If the column type is not recognized, the value is added as a String.
+     * 
+     * Expects a ResultSet with a single column.
      * 
      * Example output:
      * ["John", "Jane"]
@@ -190,6 +201,9 @@ public class ResultSetConverter {
     public static List ToList(ResultSet rs) {
         List Result = new List();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -208,10 +222,14 @@ public class ResultSetConverter {
     /**
      * Converts a JDBC ResultSet to a Map, with the value of the first column
      * used as the key, and a Map of the columns used as the value.
+     * 
      * The column types of the columns are used to determine the types of the
      * keys and values to be added to the Map (e.g. Integer for Types.INTEGER,
      * etc.).
+     * 
      * If the column types are not recognized, the values are added as Strings.
+     * 
+     * Column one should be unique in the ResultSet.
      * 
      * Example output:
      * {"John": {"Name": "John", "Age": 30}, "Jane": {"Name": "Jane", "Age": 25}}
@@ -222,6 +240,9 @@ public class ResultSetConverter {
     public static Map ToMap(ResultSet rs) {
         Map Result = new Map();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -249,11 +270,15 @@ public class ResultSetConverter {
     }
 
     /**
-     * Converts a JDBC ResultSet into a Map containing two ArrayLists: one for
-     * series values
-     * and another for data values. The first column's values are added to the
-     * series ArrayList,
-     * while the second column's values are added to the data ArrayList.
+     * Converts a JDBC ResultSet into a Map containing two ArrayLists:
+     * 
+     * One for series values and another for data values.
+     * 
+     * The first column's values are added to the series ArrayList.
+     * 
+     * The second column's values are added to the data ArrayList.
+     * 
+     * Expects a ResultSet with two columns.
      * 
      * Example output:
      * {
@@ -272,6 +297,9 @@ public class ResultSetConverter {
 
         Map Result = new Map();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -298,9 +326,12 @@ public class ResultSetConverter {
     /**
      * Converts a JDBC ResultSet to a Map, with the row number as the key
      * and the value of the first column as the value.
+     * 
      * The column type of the first column is used to determine the type of the
      * value to be added to the Map (e.g. Integer for Types.INTEGER, etc.).
      * If the column type is not recognized, the value is added as a String.
+     * 
+     * Expects a ResultSet with a single column.
      * 
      * Example output:
      * {1: "John", 2: "Jane"}
@@ -308,9 +339,12 @@ public class ResultSetConverter {
      * @param rs The ResultSet to convert.
      * @return A Map containing the values from the ResultSet.
      */
-    public static Map ToMap_IVP(ResultSet rs) {
+    public static Map ToMapOfRowNumberValuePair(ResultSet rs) {
         Map Result = new Map();
         Result.Initialize();
+
+        if (VerifyResultSet(rs) == false)
+            return Result;
 
         try {
             ResultSetMetaData metaData = rs.getMetaData();
@@ -332,10 +366,13 @@ public class ResultSetConverter {
     /**
      * Converts a JDBC ResultSet to a Map, with the first column's values used
      * as the keys, and the second column's values used as the values.
+     * 
      * The column types of the columns are used to determine the types of the
      * keys and values to be added to the Map (e.g. Integer for Types.INTEGER,
      * etc.).
      * If the column types are not recognized, the values are added as Strings.
+     * 
+     * Expects a ResultSet with two columns.
      * 
      * Example output:
      * {"John": 30, "Jane": 25}
@@ -343,13 +380,15 @@ public class ResultSetConverter {
      * @param rs The ResultSet to convert.
      * @return A Map containing the values from the ResultSet.
      */
-    public static Map ToMap_KVP(ResultSet rs) {
+    public static Map ToMapOfKeyValuePair(ResultSet rs) {
         Map Result = new Map();
         Result.Initialize();
 
+        if (VerifyResultSet(rs) == false)
+            return Result;
+
         try {
             ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
             int columnType = metaData.getColumnType(2);
 
             while (rs.next()) {
@@ -364,18 +403,44 @@ public class ResultSetConverter {
         return Result;
     }
 
+    /**
+     * Formats a given Date object to a string in the format "yyyy-MM-dd".
+     * If the given Date object is null, the method returns null.
+     * 
+     * @param date the Date object to format
+     * @return a string representation of the given Date object, or null if the
+     *         object is null
+     */
     private static String formatDate(Date date) {
         if (date == null)
             return null;
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
+    /**
+     * Formats a given Time object to a string in the format "HH:mm:ss".
+     * If the given Time object is null, the method returns null.
+     * 
+     * @param time the Time object to format
+     * @return a string representation of the given Time object, or null if the
+     *         object is null
+     */
     private static String formatTime(Time time) {
         if (time == null)
             return null;
         return new SimpleDateFormat("HH:mm:ss").format(time);
     }
 
+    /**
+     * Formats a given Timestamp object to a string in the format
+     * "yyyy-MM-dd'T'HH:mm:ss.SSSXXX".
+     * The string is formatted according to the UTC timezone.
+     * If the given Timestamp object is null, the method returns null.
+     * 
+     * @param timestamp the Timestamp object to format
+     * @return a string representation of the given Timestamp object, or null if the
+     *         object is null
+     */
     private static String formatTimestamp(Timestamp timestamp) {
         if (timestamp == null)
             return null;
@@ -384,6 +449,18 @@ public class ResultSetConverter {
         return sdf.format(timestamp);
     }
 
+    /**
+     * Retrieves the value of a column in a ResultSet, given the column index and
+     * JDBC type.
+     * If the column type is not recognized, the value is returned as a String.
+     * If the value is null, null is returned.
+     * 
+     * @param rs          The ResultSet to retrieve the value from.
+     * @param columnIndex The index of the column to retrieve.
+     * @param columnType  The JDBC type of the column.
+     * @return The value of the column, or null if the value is null or the column
+     *         type is not recognized.
+     */
     private static Object getResultSetValue(ResultSet rs, int columnIndex, int columnType) {
         Object value = null;
 
@@ -536,9 +613,47 @@ public class ResultSetConverter {
         }
     }
 
+    /**
+     * Closes the given ResultSet.
+     * Returns true if the ResultSet was closed successfully, false otherwise.
+     * If the ResultSet is null, or if it has already been read or is empty, a
+     * warning
+     * message is logged and false is returned.
+     *
+     * @param rs The ResultSet to close.
+     * @return True if the ResultSet was closed successfully, false otherwise.
+     */
     private static boolean CloseResultSet(ResultSet rs) {
         try {
             rs.close();
+            return true;
+        } catch (Exception e) {
+            Common.Log(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifies that the given ResultSet is valid and ready to be used.
+     * It checks if the ResultSet is null, and if it has already been read or is
+     * empty.
+     * If any of these conditions are true, it logs a warning message and returns
+     * false.
+     * Otherwise, it returns true.
+     *
+     * @param rs the ResultSet to verify
+     * @return true if the ResultSet is valid and ready to be used, false otherwise
+     */
+    private static boolean VerifyResultSet(ResultSet rs) {
+        try {
+            if (rs == null) {
+                Common.Log("Warning: ResultSet is null.");
+                return false;
+            }
+            if (!rs.isBeforeFirst()) {
+                Common.Log("Warning: ResultSet has already been read or is empty.");
+                return false;
+            }
             return true;
         } catch (Exception e) {
             Common.Log(e.getMessage());
