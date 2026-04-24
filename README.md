@@ -1,6 +1,6 @@
-ResultSetConverter is a small Java utility library for B4J that converts JDBC ResultSet objects into B4X-friendly List and Map structures.
+ResultSetConverter is a B4J library that turns a JDBC ResultSet into whatever shape your code needs: a List of Maps for data binding, a flat List for dropdowns, a CSV string for export, an HTML table for reports, or a JSON payload for an API response.
 
-It removes repetitive JDBC iteration and type-handling code and is particularly useful for APIs, UI data binding, exports, and reporting.
+Column types are preserved automatically so you get typed values (int, double, boolean, date strings, etc.) without any manual casting. Every method closes the ResultSet when it's done, so there's nothing to clean up.
 
 ## Methods
 
