@@ -21,6 +21,9 @@ echo.
 set errorlevel=
 %B4J_SLC% %Lib_Name% %Lib_Source_Dir%
 
+copy C:\Apps\B4J\AdditionalLibraries\ResultSetConverter.jar ResultSetConverter.jar
+copy C:\Apps\B4J\AdditionalLibraries\ResultSetConverter.xml ResultSetConverter.xml
+
 IF "%errorlevel%"=="0" GOTO OK
 IF "%errorlevel%"=="1" GOTO ERRORS
 
