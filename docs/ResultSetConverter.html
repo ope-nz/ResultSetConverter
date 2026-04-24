@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResultSetConverter - Documentation</title>
+    <link rel="stylesheet" href="ResultSetConverter.css">
+</head>
+<body>
+
+<header>
+    <h1>ResultSetConverter</h1>
+    <p>A B4J library for converting JDBC ResultSets into common data structures</p>
+    <span class="version">Version 1.1 &middot; Ope Ltd</span>
+</header>
+
+<div class="page-wrapper">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">&#x276E;</button>
+        <div class="sidebar-inner">
+            <nav>
+                <span class="nav-group-label">Overview</span>
+                <ul>
+                    <li><a href="#configuration">Configuration</a></li>
+                    <li><a href="#source-data">Sample Data</a></li>
+                </ul>
+
+                <span class="nav-group-label">Metadata</span>
+                <ul>
+                    <li><a href="#GetFieldTypes">GetFieldTypes</a></li>
+                    <li><a href="#GetFieldList">GetFieldList</a></li>
+                </ul>
+
+                <span class="nav-group-label">List Output</span>
+                <ul>
+                    <li><a href="#ToListOfMaps">ToListOfMaps</a></li>
+                    <li><a href="#ToListOfLists">ToListOfLists</a></li>
+                    <li><a href="#ToList">ToList</a></li>
+                </ul>
+
+                <span class="nav-group-label">Scalar</span>
+                <ul>
+                    <li><a href="#ToScalar">ToScalar</a></li>
+                    <li><a href="#ToScalarString">ToScalarString</a></li>
+                    <li><a href="#ToScalarInt">ToScalarInt</a></li>
+                    <li><a href="#ToScalarLong">ToScalarLong</a></li>
+                    <li><a href="#ToScalarDouble">ToScalarDouble</a></li>
+                </ul>
+
+                <span class="nav-group-label">Map Output</span>
+                <ul>
+                    <li><a href="#ToMap">ToMap</a></li>
+                    <li><a href="#ToMapOfMaps">ToMapOfMaps</a></li>
+                    <li><a href="#ToMapOfLists">ToMapOfLists</a></li>
+                    <li><a href="#ToMapOfRowNumberValuePair">ToMapOfRowNumberValuePair</a></li>
+                    <li><a href="#ToMapOfKeyValuePair">ToMapOfKeyValuePair</a></li>
+                </ul>
+
+                <span class="nav-group-label">JSON Output</span>
+                <ul>
+                    <li><a href="#ToJSON">ToJSON</a></li>
+                    <li><a href="#ToJSONObject">ToJSONObject</a></li>
+                    <li><a href="#ToJSONArray">ToJSONArray</a></li>
+                    <li><a href="#ToTimeSeriesJSON">ToTimeSeriesJSON</a></li>
+                    <li><a href="#ToPagedJSON">ToPagedJSON</a></li>
+                </ul>
+
+                <span class="nav-group-label">Text Output</span>
+                <ul>
+                    <li><a href="#ToCSV">ToCSV</a></li>
+                    <li><a href="#ToHTMLTable">ToHTMLTable</a></li>
+                </ul>
+
+                <span class="nav-group-label">Reference</span>
+                <ul>
+                    <li><a href="#type-mapping">Type Mapping</a></li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Introduction -->
+            <div class="intro">
+                <h2>Overview</h2>
+                <p>
+                    <strong>ResultSetConverter</strong> provides static methods that convert a JDBC <code>ResultSet</code>
+                    into B4J-friendly <code>List</code> and <code>Map</code> structures. Column types are preserved
+                    automatically (integers, doubles, booleans, dates, etc.). Unrecognized types default to strings.
+                </p>
+                <p>
+                    All conversion methods (except <code>GetFieldTypes</code> and <code>GetFieldList</code>)
+                    automatically close the ResultSet after processing.
+                </p>
+            </div>
+
+            <!-- Configuration -->
+            <div class="method" id="configuration">
+                <div class="method-header">
+                    <h2>Configuration</h2>
+                </div>
+                <div class="method-body">
+
+                    <h3 style="font-size:1.05rem; margin-bottom:8px;">SetLowerCaseFieldNames</h3>
+                    <div class="method-signature" style="margin-bottom:12px;">public static void SetLowerCaseFieldNames(boolean value)</div>
+                    <p>Sets whether column names are converted to lowercase when used as keys or headers. Applies globally to all subsequent calls. Default is <code>false</code>.</p>
+                    <div class="note">This setting affects all methods that return field names: <code>GetFieldTypes</code>, <code>GetFieldList</code>, <code>ToListOfMaps</code>, <code>ToListOfLists</code>, <code>ToMap</code>, <code>ToMapOfMaps</code>, <code>ToMapOfLists</code>, <code>ToJSON</code>, <code>ToJSONObject</code>, <code>ToCSV</code>, and <code>ToPagedJSON</code>.</div>
+                    <ul class="param-list" style="margin-top:12px;">
+                        <li><span class="param-name">value</span> &mdash; If true, all column names used as keys or headers are lowercased.</li>
+                    </ul>
+
+                    <p class="output-label" style="margin-top:16px;">Example &mdash; SetLowerCaseFieldNames(false) (default):</p>
+<pre><span class="json-bracket">[</span><span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"John"</span>, <span class="json-key">"Age"</span>:<span class="json-num">30</span>, <span class="json-key">"HireDate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>, ...<span class="json-bracket">]</span></pre>
+
+                    <p class="output-label">Example &mdash; SetLowerCaseFieldNames(true):</p>
+<pre><span class="json-bracket">[</span><span class="json-bracket">{</span><span class="json-key">"name"</span>:<span class="json-str">"John"</span>, <span class="json-key">"age"</span>:<span class="json-num">30</span>, <span class="json-key">"hiredate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>, ...<span class="json-bracket">]</span></pre>
+
+                </div>
+            </div>
+
+            <!-- Source Data Table -->
+            <div class="method" id="source-data">
+                <div class="method-header">
+                    <h2>Sample Source Data</h2>
+                </div>
+                <div class="method-body">
+                    <p>All examples below use the following sample database table:</p>
+                    <div class="source-table">
+                        <h3>Employees</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name (VARCHAR)</th>
+                                    <th>Age (INTEGER)</th>
+                                    <th>Salary (DOUBLE)</th>
+                                    <th>Active (BOOLEAN)</th>
+                                    <th>HireDate (DATE)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>John</td>
+                                    <td>30</td>
+                                    <td>55000.50</td>
+                                    <td>true</td>
+                                    <td>2020-03-15</td>
+                                </tr>
+                                <tr>
+                                    <td>Jane</td>
+                                    <td>25</td>
+                                    <td>48000.00</td>
+                                    <td>true</td>
+                                    <td>2021-07-01</td>
+                                </tr>
+                                <tr>
+                                    <td>Bob</td>
+                                    <td>40</td>
+                                    <td>72000.75</td>
+                                    <td>false</td>
+                                    <td>2018-11-20</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">SQL Query used:</p>
+                    <pre>SELECT Name, Age, Salary, Active, HireDate FROM Employees</pre>
+                </div>
+            </div>
+
+            <!-- GetFieldTypes -->
+            <div class="method" id="GetFieldTypes">
+                <div class="method-header">
+                    <h2>GetFieldTypes <span class="badge badge-map">Map</span> <span class="badge badge-meta">Metadata</span> <span class="badge badge-noclose">Does not close RS</span></h2>
+                    <div class="method-signature">public static Map GetFieldTypes(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns a Map of column names to their JDBC type names. Useful for inspecting the schema of a ResultSet before processing it.</p>
+                    <div class="note">This method does <strong>not</strong> close the ResultSet, allowing you to call a conversion method afterwards.</div>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to inspect.</li>
+                    </ul>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"Name"</span>:     <span class="json-str">"VARCHAR"</span>,
+  <span class="json-key">"Age"</span>:      <span class="json-str">"INTEGER"</span>,
+  <span class="json-key">"Salary"</span>:   <span class="json-str">"DOUBLE"</span>,
+  <span class="json-key">"Active"</span>:   <span class="json-str">"BOOLEAN"</span>,
+  <span class="json-key">"HireDate"</span>: <span class="json-str">"DATE"</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- GetFieldList -->
+            <div class="method" id="GetFieldList">
+                <div class="method-header">
+                    <h2>GetFieldList <span class="badge badge-list">List</span> <span class="badge badge-meta">Metadata</span> <span class="badge badge-noclose">Does not close RS</span></h2>
+                    <div class="method-signature">public static List GetFieldList(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns a List of column names from the ResultSet.</p>
+                    <div class="note">This method does <strong>not</strong> close the ResultSet, allowing you to call a conversion method afterwards.</div>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to inspect.</li>
+                    </ul>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">[</span><span class="json-str">"Name"</span>, <span class="json-str">"Age"</span>, <span class="json-str">"Salary"</span>, <span class="json-str">"Active"</span>, <span class="json-str">"HireDate"</span><span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToListOfMaps -->
+            <div class="method" id="ToListOfMaps">
+                <div class="method-header">
+                    <h2>ToListOfMaps <span class="badge badge-list">List</span></h2>
+                    <div class="method-signature">public static List ToListOfMaps(ResultSet rs, boolean includeRowNumber, String rowNumberColumnName)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet into a List of Maps. Each row becomes a Map with column names as keys. If <code>includeRowNumber</code> is true, a 1-based row number is added as the first entry, using <code>rowNumberColumnName</code> as the key. Pass <code>null</code> for <code>rowNumberColumnName</code> to use the default key <code>"Row"</code>.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">includeRowNumber</span> &mdash; If true, each Map includes a row number field.</li>
+                        <li><span class="param-name">rowNumberColumnName</span> &mdash; The key name for the row number field. Defaults to <code>"Row"</code> if null.</li>
+                    </ul>
+                    <p class="output-label">Output (includeRowNumber = false):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>: <span class="json-str">"John"</span>, <span class="json-key">"Age"</span>: <span class="json-num">30</span>, <span class="json-key">"Salary"</span>: <span class="json-num">55000.5</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>: <span class="json-str">"Jane"</span>, <span class="json-key">"Age"</span>: <span class="json-num">25</span>, <span class="json-key">"Salary"</span>: <span class="json-num">48000.0</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>: <span class="json-str">"Bob"</span>, <span class="json-key">"Age"</span>: <span class="json-num">40</span>, <span class="json-key">"Salary"</span>: <span class="json-num">72000.75</span>, <span class="json-key">"Active"</span>: <span class="json-num">false</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+<span class="json-bracket">]</span></pre>
+                    <p class="output-label">Output (includeRowNumber = true, rowNumberColumnName = null):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>: <span class="json-num">1</span>, <span class="json-key">"Name"</span>: <span class="json-str">"John"</span>, <span class="json-key">"Age"</span>: <span class="json-num">30</span>, <span class="json-key">"Salary"</span>: <span class="json-num">55000.5</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>: <span class="json-num">2</span>, <span class="json-key">"Name"</span>: <span class="json-str">"Jane"</span>, <span class="json-key">"Age"</span>: <span class="json-num">25</span>, <span class="json-key">"Salary"</span>: <span class="json-num">48000.0</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>: <span class="json-num">3</span>, <span class="json-key">"Name"</span>: <span class="json-str">"Bob"</span>, <span class="json-key">"Age"</span>: <span class="json-num">40</span>, <span class="json-key">"Salary"</span>: <span class="json-num">72000.75</span>, <span class="json-key">"Active"</span>: <span class="json-num">false</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+<span class="json-bracket">]</span></pre>
+                    <p class="output-label">Output (includeRowNumber = true, rowNumberColumnName = "#"):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"#"</span>: <span class="json-num">1</span>, <span class="json-key">"Name"</span>: <span class="json-str">"John"</span>, <span class="json-key">"Age"</span>: <span class="json-num">30</span>, <span class="json-key">"Salary"</span>: <span class="json-num">55000.5</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"#"</span>: <span class="json-num">2</span>, <span class="json-key">"Name"</span>: <span class="json-str">"Jane"</span>, <span class="json-key">"Age"</span>: <span class="json-num">25</span>, <span class="json-key">"Salary"</span>: <span class="json-num">48000.0</span>, <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"#"</span>: <span class="json-num">3</span>, <span class="json-key">"Name"</span>: <span class="json-str">"Bob"</span>, <span class="json-key">"Age"</span>: <span class="json-num">40</span>, <span class="json-key">"Salary"</span>: <span class="json-num">72000.75</span>, <span class="json-key">"Active"</span>: <span class="json-num">false</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+<span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToListOfLists -->
+            <div class="method" id="ToListOfLists">
+                <div class="method-header">
+                    <h2>ToListOfLists <span class="badge badge-list">List</span></h2>
+                    <div class="method-signature">public static List ToListOfLists(ResultSet rs, boolean includeHeader)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet into a List of Lists. If <code>includeHeader</code> is true, the first inner list contains the column names.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">includeHeader</span> &mdash; If true, the first List contains column names.</li>
+                    </ul>
+                    <p class="output-label">Output (includeHeader = true):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">[</span><span class="json-str">"Name"</span>,   <span class="json-str">"Age"</span>,    <span class="json-str">"Salary"</span>,     <span class="json-str">"Active"</span>,   <span class="json-str">"HireDate"</span><span class="json-bracket">]</span>,
+  <span class="json-bracket">[</span><span class="json-str">"John"</span>,   <span class="json-num">30</span>,       <span class="json-num">55000.5</span>,      <span class="json-num">true</span>,      <span class="json-str">"2020-03-15"</span><span class="json-bracket">]</span>,
+  <span class="json-bracket">[</span><span class="json-str">"Jane"</span>,   <span class="json-num">25</span>,       <span class="json-num">48000.0</span>,      <span class="json-num">true</span>,      <span class="json-str">"2021-07-01"</span><span class="json-bracket">]</span>,
+  <span class="json-bracket">[</span><span class="json-str">"Bob"</span>,    <span class="json-num">40</span>,       <span class="json-num">72000.75</span>,     <span class="json-num">false</span>,     <span class="json-str">"2018-11-20"</span><span class="json-bracket">]</span>
+<span class="json-bracket">]</span></pre>
+                    <p class="output-label">Output (includeHeader = false):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">[</span><span class="json-str">"John"</span>,   <span class="json-num">30</span>,   <span class="json-num">55000.5</span>,    <span class="json-num">true</span>,    <span class="json-str">"2020-03-15"</span><span class="json-bracket">]</span>,
+  <span class="json-bracket">[</span><span class="json-str">"Jane"</span>,   <span class="json-num">25</span>,   <span class="json-num">48000.0</span>,    <span class="json-num">true</span>,    <span class="json-str">"2021-07-01"</span><span class="json-bracket">]</span>,
+  <span class="json-bracket">[</span><span class="json-str">"Bob"</span>,    <span class="json-num">40</span>,   <span class="json-num">72000.75</span>,   <span class="json-num">false</span>,   <span class="json-str">"2018-11-20"</span><span class="json-bracket">]</span>
+<span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToList -->
+            <div class="method" id="ToList">
+                <div class="method-header">
+                    <h2>ToList <span class="badge badge-list">List</span></h2>
+                    <div class="method-signature">public static List ToList(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Extracts values from the first column into a flat List. Expects a ResultSet with a single column.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT Name FROM Employees</code></h3>
+                        <table>
+                            <thead><tr><th>Name (VARCHAR)</th></tr></thead>
+                            <tbody>
+                                <tr><td>John</td></tr>
+                                <tr><td>Jane</td></tr>
+                                <tr><td>Bob</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">[</span><span class="json-str">"John"</span>, <span class="json-str">"Jane"</span>, <span class="json-str">"Bob"</span><span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToScalar -->
+            <div class="method" id="ToScalar">
+                <div class="method-header">
+                    <h2>ToScalar</h2>
+                    <div class="method-signature">public static Object ToScalar(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns a single value from the first column of the first row. Ideal for aggregate queries such as <code>COUNT(*)</code>, <code>MAX()</code>, <code>SUM()</code>, etc. Returns <code>null</code> if the ResultSet is empty.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to read.</li>
+                    </ul>
+                    <p class="output-label">Example 1 &mdash; <code>SELECT COUNT(*) FROM Employees</code></p>
+<pre><span class="json-num">3</span></pre>
+                    <p class="output-label">Example 2 &mdash; <code>SELECT MAX(Age) FROM Employees</code></p>
+<pre><span class="json-num">40</span></pre>
+                    <p class="output-label">Example 3 &mdash; <code>SELECT SUM(Salary) FROM Employees</code></p>
+<pre><span class="json-num">175001.25</span></pre>
+                    <p class="output-label">Example 4 &mdash; <code>SELECT Name FROM Employees WHERE Age = 30</code></p>
+<pre><span class="json-str">"John"</span></pre>
+                </div>
+            </div>
+
+            <!-- ToScalarString -->
+            <div class="method" id="ToScalarString">
+                <div class="method-header">
+                    <h2>ToScalarString</h2>
+                    <div class="method-signature">public static String ToScalarString(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns the first column of the first row as a <code>String</code>. Any column type is accepted: numeric, boolean, date, and string types are all converted via their toString representation. Dates are formatted as <code>"yyyy-MM-dd"</code>, times as <code>"HH:mm:ss"</code>, and timestamps as <code>"yyyy-MM-dd'T'HH:mm:ss.SSSXXX"</code>. Returns <code>null</code> if the ResultSet is empty, the value is SQL NULL, or an error occurs.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to read.</li>
+                    </ul>
+                    <p class="output-label">Example &mdash; <code>SELECT Name FROM Employees WHERE Age = 30</code></p>
+<pre><span class="json-str">"John"</span></pre>
+                    <p class="output-label">Example &mdash; <code>SELECT Age FROM Employees WHERE Age = 30</code></p>
+<pre><span class="json-str">"30"</span></pre>
+                </div>
+            </div>
+
+            <!-- ToScalarInt -->
+            <div class="method" id="ToScalarInt">
+                <div class="method-header">
+                    <h2>ToScalarInt</h2>
+                    <div class="method-signature">public static int ToScalarInt(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns the first column of the first row as an <code>int</code>. Returns <code>0</code> if the ResultSet is empty, the value is SQL NULL, the column is not an integer type, or an error occurs.</p>
+                    <p>Accepted column types: <code>INTEGER</code>, <code>SMALLINT</code>, <code>TINYINT</code>.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to read.</li>
+                    </ul>
+                    <p class="output-label">Example &mdash; <code>SELECT Age FROM Employees WHERE Name = 'John'</code></p>
+<pre><span class="json-num">30</span></pre>
+                    <p class="output-label">Returns <code>0</code> if the column is not an integer type or the value is SQL NULL.</p>
+                </div>
+            </div>
+
+            <!-- ToScalarLong -->
+            <div class="method" id="ToScalarLong">
+                <div class="method-header">
+                    <h2>ToScalarLong</h2>
+                    <div class="method-signature">public static long ToScalarLong(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns the first column of the first row as a <code>long</code>. Returns <code>0</code> if the ResultSet is empty, the value is SQL NULL, the column is not a bigint type, or an error occurs.</p>
+                    <p>Accepted column types: <code>BIGINT</code>.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to read.</li>
+                    </ul>
+                    <p class="output-label">Example &mdash; <code>SELECT Id FROM Employees WHERE Name = 'John'</code> (Id is BIGINT)</p>
+<pre><span class="json-num">1001</span></pre>
+                    <p class="output-label">Returns <code>0</code> if the column is not a bigint type or the value is SQL NULL.</p>
+                </div>
+            </div>
+
+            <!-- ToScalarDouble -->
+            <div class="method" id="ToScalarDouble">
+                <div class="method-header">
+                    <h2>ToScalarDouble</h2>
+                    <div class="method-signature">public static double ToScalarDouble(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Returns the first column of the first row as a <code>double</code>. Returns <code>0.0</code> if the ResultSet is empty, the value is SQL NULL, the column is not a floating-point or decimal type, or an error occurs.</p>
+                    <p>Accepted column types: <code>DOUBLE</code>, <code>FLOAT</code>, <code>REAL</code>, <code>DECIMAL</code>, <code>NUMERIC</code>.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to read.</li>
+                    </ul>
+                    <p class="output-label">Example &mdash; <code>SELECT Salary FROM Employees WHERE Name = 'John'</code></p>
+<pre><span class="json-num">55000.5</span></pre>
+                    <p class="output-label">Returns <code>0.0</code> if the column is not a numeric type or the value is SQL NULL.</p>
+                </div>
+            </div>
+
+            <!-- ToMap -->
+            <div class="method" id="ToMap">
+                <div class="method-header">
+                    <h2>ToMap <span class="badge badge-map">Map</span></h2>
+                    <div class="method-signature">public static Map ToMap(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts a single-row ResultSet into a Map with column names as keys. If more than one row exists, only the first row is used.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT * FROM Employees WHERE Name = 'John'</code></h3>
+                        <table>
+                            <thead>
+                                <tr><th>Name</th><th>Age</th><th>Salary</th><th>Active</th><th>HireDate</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>John</td><td>30</td><td>55000.50</td><td>true</td><td>2020-03-15</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"Name"</span>:     <span class="json-str">"John"</span>,
+  <span class="json-key">"Age"</span>:      <span class="json-num">30</span>,
+  <span class="json-key">"Salary"</span>:   <span class="json-num">55000.5</span>,
+  <span class="json-key">"Active"</span>:   <span class="json-num">true</span>,
+  <span class="json-key">"HireDate"</span>: <span class="json-str">"2020-03-15"</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToMapOfMaps -->
+            <div class="method" id="ToMapOfMaps">
+                <div class="method-header">
+                    <h2>ToMapOfMaps <span class="badge badge-map">Map</span></h2>
+                    <div class="method-signature">public static Map ToMapOfMaps(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet into a Map of Maps. The first column's value is used as the key for each row. Column one should contain unique values.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"John"</span>: <span class="json-bracket">{</span>
+    <span class="json-key">"Name"</span>: <span class="json-str">"John"</span>, <span class="json-key">"Age"</span>: <span class="json-num">30</span>, <span class="json-key">"Salary"</span>: <span class="json-num">55000.5</span>,
+    <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2020-03-15"</span>
+  <span class="json-bracket">}</span>,
+  <span class="json-key">"Jane"</span>: <span class="json-bracket">{</span>
+    <span class="json-key">"Name"</span>: <span class="json-str">"Jane"</span>, <span class="json-key">"Age"</span>: <span class="json-num">25</span>, <span class="json-key">"Salary"</span>: <span class="json-num">48000.0</span>,
+    <span class="json-key">"Active"</span>: <span class="json-num">true</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2021-07-01"</span>
+  <span class="json-bracket">}</span>,
+  <span class="json-key">"Bob"</span>: <span class="json-bracket">{</span>
+    <span class="json-key">"Name"</span>: <span class="json-str">"Bob"</span>, <span class="json-key">"Age"</span>: <span class="json-num">40</span>, <span class="json-key">"Salary"</span>: <span class="json-num">72000.75</span>,
+    <span class="json-key">"Active"</span>: <span class="json-num">false</span>, <span class="json-key">"HireDate"</span>: <span class="json-str">"2018-11-20"</span>
+  <span class="json-bracket">}</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToMapOfLists -->
+            <div class="method" id="ToMapOfLists">
+                <div class="method-header">
+                    <h2>ToMapOfLists <span class="badge badge-map">Map</span></h2>
+                    <div class="method-signature">public static Map ToMapOfLists(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet into a column-oriented Map. Each key is a column name, and each value is a List of all values in that column.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"Name"</span>:     <span class="json-bracket">[</span><span class="json-str">"John"</span>,       <span class="json-str">"Jane"</span>,       <span class="json-str">"Bob"</span><span class="json-bracket">]</span>,
+  <span class="json-key">"Age"</span>:      <span class="json-bracket">[</span><span class="json-num">30</span>,           <span class="json-num">25</span>,           <span class="json-num">40</span><span class="json-bracket">]</span>,
+  <span class="json-key">"Salary"</span>:   <span class="json-bracket">[</span><span class="json-num">55000.5</span>,      <span class="json-num">48000.0</span>,      <span class="json-num">72000.75</span><span class="json-bracket">]</span>,
+  <span class="json-key">"Active"</span>:   <span class="json-bracket">[</span><span class="json-num">true</span>,         <span class="json-num">true</span>,         <span class="json-num">false</span><span class="json-bracket">]</span>,
+  <span class="json-key">"HireDate"</span>: <span class="json-bracket">[</span><span class="json-str">"2020-03-15"</span>, <span class="json-str">"2021-07-01"</span>, <span class="json-str">"2018-11-20"</span><span class="json-bracket">]</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToMapOfRowNumberValuePair -->
+            <div class="method" id="ToMapOfRowNumberValuePair">
+                <div class="method-header">
+                    <h2>ToMapOfRowNumberValuePair <span class="badge badge-map">Map</span></h2>
+                    <div class="method-signature">public static Map ToMapOfRowNumberValuePair(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts a single-column ResultSet into a Map with the row number (starting at 1) as the key and the column value as the value.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT Name FROM Employees</code></h3>
+                        <table>
+                            <thead><tr><th>Name (VARCHAR)</th></tr></thead>
+                            <tbody>
+                                <tr><td>John</td></tr>
+                                <tr><td>Jane</td></tr>
+                                <tr><td>Bob</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-num">1</span>: <span class="json-str">"John"</span>,
+  <span class="json-num">2</span>: <span class="json-str">"Jane"</span>,
+  <span class="json-num">3</span>: <span class="json-str">"Bob"</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToMapOfKeyValuePair -->
+            <div class="method" id="ToMapOfKeyValuePair">
+                <div class="method-header">
+                    <h2>ToMapOfKeyValuePair <span class="badge badge-map">Map</span></h2>
+                    <div class="method-signature">public static Map ToMapOfKeyValuePair(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts a two-column ResultSet into a Map. The first column provides the keys and the second column provides the values.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT Name, Age FROM Employees</code></h3>
+                        <table>
+                            <thead><tr><th>Name (VARCHAR)</th><th>Age (INTEGER)</th></tr></thead>
+                            <tbody>
+                                <tr><td>John</td><td>30</td></tr>
+                                <tr><td>Jane</td><td>25</td></tr>
+                                <tr><td>Bob</td><td>40</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"John"</span>: <span class="json-num">30</span>,
+  <span class="json-key">"Jane"</span>: <span class="json-num">25</span>,
+  <span class="json-key">"Bob"</span>:  <span class="json-num">40</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToJSON -->
+            <div class="method" id="ToJSON">
+                <div class="method-header">
+                    <h2>ToJSON <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToJSON(ResultSet rs, boolean includeRowNumber)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet to a JSON array of objects, with column names as keys. If <code>includeRowNumber</code> is true, each object includes a <code>"Row"</code> field (1-based) as the first key.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">includeRowNumber</span> &mdash; If true, each object includes a "Row" field.</li>
+                    </ul>
+                    <p class="output-label">Output (includeRowNumber = false):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"John"</span>,<span class="json-key">"Age"</span>:<span class="json-num">30</span>,<span class="json-key">"Salary"</span>:<span class="json-num">55000.5</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"Jane"</span>,<span class="json-key">"Age"</span>:<span class="json-num">25</span>,<span class="json-key">"Salary"</span>:<span class="json-num">48000.0</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"Bob"</span>,<span class="json-key">"Age"</span>:<span class="json-num">40</span>,<span class="json-key">"Salary"</span>:<span class="json-num">72000.75</span>,<span class="json-key">"Active"</span>:<span class="json-num">false</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+<span class="json-bracket">]</span></pre>
+                    <p class="output-label">Output (includeRowNumber = true):</p>
+<pre><span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>:<span class="json-num">1</span>,<span class="json-key">"Name"</span>:<span class="json-str">"John"</span>,<span class="json-key">"Age"</span>:<span class="json-num">30</span>,<span class="json-key">"Salary"</span>:<span class="json-num">55000.5</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>:<span class="json-num">2</span>,<span class="json-key">"Name"</span>:<span class="json-str">"Jane"</span>,<span class="json-key">"Age"</span>:<span class="json-num">25</span>,<span class="json-key">"Salary"</span>:<span class="json-num">48000.0</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"Row"</span>:<span class="json-num">3</span>,<span class="json-key">"Name"</span>:<span class="json-str">"Bob"</span>,<span class="json-key">"Age"</span>:<span class="json-num">40</span>,<span class="json-key">"Salary"</span>:<span class="json-num">72000.75</span>,<span class="json-key">"Active"</span>:<span class="json-num">false</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+<span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToJSONObject -->
+            <div class="method" id="ToJSONObject">
+                <div class="method-header">
+                    <h2>ToJSONObject <span class="badge badge-map">String</span></h2>
+                    <div class="method-signature">public static String ToJSONObject(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the first row of the ResultSet to a single JSON object with column names as keys. Returns <code>{}</code> if the ResultSet is empty. If more than one row exists, only the first is used.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT * FROM Employees WHERE Name = 'John'</code></h3>
+                        <table>
+                            <thead><tr><th>Name</th><th>Age</th><th>Salary</th><th>Active</th><th>HireDate</th></tr></thead>
+                            <tbody><tr><td>John</td><td>30</td><td>55000.50</td><td>true</td><td>2020-03-15</td></tr></tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"John"</span>,<span class="json-key">"Age"</span>:<span class="json-num">30</span>,<span class="json-key">"Salary"</span>:<span class="json-num">55000.5</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToJSONArray -->
+            <div class="method" id="ToJSONArray">
+                <div class="method-header">
+                    <h2>ToJSONArray <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToJSONArray(ResultSet rs)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the first column of the ResultSet to a flat JSON array. Expects a single-column ResultSet.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT Name FROM Employees</code></h3>
+                        <table>
+                            <thead><tr><th>Name (VARCHAR)</th></tr></thead>
+                            <tbody>
+                                <tr><td>John</td></tr>
+                                <tr><td>Jane</td></tr>
+                                <tr><td>Bob</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output:</p>
+<pre><span class="json-bracket">[</span><span class="json-str">"John"</span>,<span class="json-str">"Jane"</span>,<span class="json-str">"Bob"</span><span class="json-bracket">]</span></pre>
+                </div>
+            </div>
+
+            <!-- ToTimeSeriesJSON -->
+            <div class="method" id="ToTimeSeriesJSON">
+                <div class="method-header">
+                    <h2>ToTimeSeriesJSON <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToTimeSeriesJSON(ResultSet rs, String timeColumn, String[] valueColumns)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet to an ECharts-compatible time-series JSON object. The time column must contain epoch millisecond values stored as a BIGINT. Each name in <code>valueColumns</code> produces one series in the output. Column lookup for both <code>timeColumn</code> and <code>valueColumns</code> is case-insensitive.</p>
+                    <div class="note">Returns <code>{"series":[]}</code> if the ResultSet is invalid or <code>timeColumn</code> is not found. Missing value columns are silently treated as null for every row.</div>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">timeColumn</span> &mdash; Column name containing epoch-ms timestamps (BIGINT).</li>
+                        <li><span class="param-name">valueColumns</span> &mdash; Column names to expose as series (case-insensitive).</li>
+                    </ul>
+                    <div class="source-table">
+                        <h3>Expected input: <code>SELECT Ts, CPU, Memory FROM ServerMetrics ORDER BY Ts</code></h3>
+                        <table>
+                            <thead><tr><th>Ts (BIGINT)</th><th>CPU (DOUBLE)</th><th>Memory (DOUBLE)</th></tr></thead>
+                            <tbody>
+                                <tr><td>1711450000000</td><td>23.4</td><td>61.2</td></tr>
+                                <tr><td>1711450060000</td><td>41.7</td><td>63.8</td></tr>
+                                <tr><td>1711450120000</td><td>35.1</td><td>62.5</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="output-label">Output &mdash; <code>ToTimeSeriesJSON(rs, "Ts", Array("CPU", "Memory"))</code>:</p>
+<pre><span class="json-bracket">{</span><span class="json-key">"series"</span>:<span class="json-bracket">[</span>
+  <span class="json-bracket">{</span><span class="json-key">"name"</span>:<span class="json-str">"CPU"</span>,<span class="json-key">"data"</span>:<span class="json-bracket">[</span>
+    <span class="json-bracket">[</span><span class="json-num">1711450000000</span>,<span class="json-num">23.4</span><span class="json-bracket">]</span>,
+    <span class="json-bracket">[</span><span class="json-num">1711450060000</span>,<span class="json-num">41.7</span><span class="json-bracket">]</span>,
+    <span class="json-bracket">[</span><span class="json-num">1711450120000</span>,<span class="json-num">35.1</span><span class="json-bracket">]</span>
+  <span class="json-bracket">]}</span>,
+  <span class="json-bracket">{</span><span class="json-key">"name"</span>:<span class="json-str">"Memory"</span>,<span class="json-key">"data"</span>:<span class="json-bracket">[</span>
+    <span class="json-bracket">[</span><span class="json-num">1711450000000</span>,<span class="json-num">61.2</span><span class="json-bracket">]</span>,
+    <span class="json-bracket">[</span><span class="json-num">1711450060000</span>,<span class="json-num">63.8</span><span class="json-bracket">]</span>,
+    <span class="json-bracket">[</span><span class="json-num">1711450120000</span>,<span class="json-num">62.5</span><span class="json-bracket">]</span>
+  <span class="json-bracket">]}</span>
+<span class="json-bracket">]}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToPagedJSON -->
+            <div class="method" id="ToPagedJSON">
+                <div class="method-header">
+                    <h2>ToPagedJSON <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToPagedJSON(ResultSet rs, int page, int pageSize)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet to a paginated JSON object. All rows are read into memory first, then the requested page slice is returned. Pages are 1-based. If <code>page</code> is less than 1 it is clamped to 1; if <code>pageSize</code> is less than 1 it defaults to 100.</p>
+                    <p>Respects <code>SetLowerCaseFieldNames</code>.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">page</span> &mdash; 1-based page number to return.</li>
+                        <li><span class="param-name">pageSize</span> &mdash; Number of rows per page.</li>
+                    </ul>
+                    <p class="output-label">Output &mdash; <code>ToPagedJSON(rs, 1, 2)</code> on the Employees table:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"page"</span>:      <span class="json-num">1</span>,
+  <span class="json-key">"pageSize"</span>:  <span class="json-num">2</span>,
+  <span class="json-key">"totalRows"</span>: <span class="json-num">3</span>,
+  <span class="json-key">"data"</span>: <span class="json-bracket">[</span>
+    <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"John"</span>,<span class="json-key">"Age"</span>:<span class="json-num">30</span>,<span class="json-key">"Salary"</span>:<span class="json-num">55000.5</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2020-03-15"</span><span class="json-bracket">}</span>,
+    <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"Jane"</span>,<span class="json-key">"Age"</span>:<span class="json-num">25</span>,<span class="json-key">"Salary"</span>:<span class="json-num">48000.0</span>,<span class="json-key">"Active"</span>:<span class="json-num">true</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2021-07-01"</span><span class="json-bracket">}</span>
+  <span class="json-bracket">]</span>
+<span class="json-bracket">}</span></pre>
+                    <p class="output-label">Page 2 of the same query &mdash; <code>ToPagedJSON(rs, 2, 2)</code>:</p>
+<pre><span class="json-bracket">{</span>
+  <span class="json-key">"page"</span>:      <span class="json-num">2</span>,
+  <span class="json-key">"pageSize"</span>:  <span class="json-num">2</span>,
+  <span class="json-key">"totalRows"</span>: <span class="json-num">3</span>,
+  <span class="json-key">"data"</span>: <span class="json-bracket">[</span>
+    <span class="json-bracket">{</span><span class="json-key">"Name"</span>:<span class="json-str">"Bob"</span>,<span class="json-key">"Age"</span>:<span class="json-num">40</span>,<span class="json-key">"Salary"</span>:<span class="json-num">72000.75</span>,<span class="json-key">"Active"</span>:<span class="json-num">false</span>,<span class="json-key">"HireDate"</span>:<span class="json-str">"2018-11-20"</span><span class="json-bracket">}</span>
+  <span class="json-bracket">]</span>
+<span class="json-bracket">}</span></pre>
+                </div>
+            </div>
+
+            <!-- ToCSV -->
+            <div class="method" id="ToCSV">
+                <div class="method-header">
+                    <h2>ToCSV <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToCSV(ResultSet rs, boolean includeHeader)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet to a CSV string. Lines are separated by CRLF per RFC 4180. Values containing commas, double-quotes, or newlines are wrapped in double-quotes, with internal double-quotes escaped by doubling.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">includeHeader</span> &mdash; If true, the first line contains column names.</li>
+                    </ul>
+                    <p class="output-label">Output (includeHeader = true):</p>
+<pre>Name,Age,Salary,Active,HireDate
+John,30,55000.5,true,2020-03-15
+Jane,25,48000.0,true,2021-07-01
+Bob,40,72000.75,false,2018-11-20</pre>
+                    <p class="output-label">Output (includeHeader = false):</p>
+<pre>John,30,55000.5,true,2020-03-15
+Jane,25,48000.0,true,2021-07-01
+Bob,40,72000.75,false,2018-11-20</pre>
+                </div>
+            </div>
+
+            <!-- ToHTMLTable -->
+            <div class="method" id="ToHTMLTable">
+                <div class="method-header">
+                    <h2>ToHTMLTable <span class="badge badge-list">String</span></h2>
+                    <div class="method-signature">public static String ToHTMLTable(ResultSet rs, String cssClass)</div>
+                </div>
+                <div class="method-body">
+                    <p>Converts the ResultSet to an HTML table string with <code>&lt;thead&gt;</code> and <code>&lt;tbody&gt;</code> sections. Column names are used as header cells. All text content is HTML-escaped. Null values render as empty cells.</p>
+                    <ul class="param-list">
+                        <li><span class="param-name">rs</span> &mdash; The ResultSet to convert.</li>
+                        <li><span class="param-name">cssClass</span> &mdash; Optional CSS class for the <code>&lt;table&gt;</code> element. Pass <code>null</code> or <code>""</code> for no class.</li>
+                    </ul>
+                    <p class="output-label">Output (cssClass = "data-table"):</p>
+<pre>&lt;table class="data-table"&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Age&lt;/th&gt;&lt;th&gt;Salary&lt;/th&gt;&lt;th&gt;Active&lt;/th&gt;&lt;th&gt;HireDate&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;John&lt;/td&gt;&lt;td&gt;30&lt;/td&gt;&lt;td&gt;55000.5&lt;/td&gt;&lt;td&gt;true&lt;/td&gt;&lt;td&gt;2020-03-15&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Jane&lt;/td&gt;&lt;td&gt;25&lt;/td&gt;&lt;td&gt;48000.0&lt;/td&gt;&lt;td&gt;true&lt;/td&gt;&lt;td&gt;2021-07-01&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Bob&lt;/td&gt;&lt;td&gt;40&lt;/td&gt;&lt;td&gt;72000.75&lt;/td&gt;&lt;td&gt;false&lt;/td&gt;&lt;td&gt;2018-11-20&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</pre>
+                </div>
+            </div>
+
+            <!-- Type Mapping -->
+            <div class="method" id="type-mapping">
+                <div class="method-header">
+                    <h2>Type Mapping Reference</h2>
+                </div>
+                <div class="method-body">
+                    <p>The following table shows how JDBC types are mapped to Java types when reading values from a ResultSet:</p>
+                    <table style="margin: 16px 0;">
+                        <thead>
+                            <tr><th>JDBC Type(s)</th><th>Java Type</th><th>Example Value</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>INTEGER, SMALLINT, TINYINT</td><td>int</td><td>42</td></tr>
+                            <tr><td>BIGINT</td><td>long</td><td>9223372036854775807</td></tr>
+                            <tr><td>FLOAT, REAL</td><td>float</td><td>3.14</td></tr>
+                            <tr><td>DOUBLE</td><td>double</td><td>3.141592653589793</td></tr>
+                            <tr><td>DECIMAL, NUMERIC</td><td>BigDecimal</td><td>99999.99</td></tr>
+                            <tr><td>BOOLEAN, BIT</td><td>boolean</td><td>true</td></tr>
+                            <tr><td>DATE</td><td>String</td><td>"2020-03-15"</td></tr>
+                            <tr><td>TIME</td><td>String</td><td>"14:30:00"</td></tr>
+                            <tr><td>TIMESTAMP</td><td>String</td><td>"2020-03-15T14:30:00.000+00:00"</td></tr>
+                            <tr><td>All others</td><td>String</td><td>"text value"</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="types-section">
+                        <p class="output-label">All recognized JDBC type names (returned by GetFieldTypes):</p>
+                        <div class="types-grid">
+                            <div class="type-item">ARRAY</div>
+                            <div class="type-item">BIGINT</div>
+                            <div class="type-item">BINARY</div>
+                            <div class="type-item">BIT</div>
+                            <div class="type-item">BLOB</div>
+                            <div class="type-item">BOOLEAN</div>
+                            <div class="type-item">CHAR</div>
+                            <div class="type-item">CLOB</div>
+                            <div class="type-item">DATALINK</div>
+                            <div class="type-item">DATE</div>
+                            <div class="type-item">DECIMAL</div>
+                            <div class="type-item">DISTINCT</div>
+                            <div class="type-item">DOUBLE</div>
+                            <div class="type-item">FLOAT</div>
+                            <div class="type-item">INTEGER</div>
+                            <div class="type-item">JAVA_OBJECT</div>
+                            <div class="type-item">LONGNVARCHAR</div>
+                            <div class="type-item">LONGVARBINARY</div>
+                            <div class="type-item">LONGVARCHAR</div>
+                            <div class="type-item">NCHAR</div>
+                            <div class="type-item">NCLOB</div>
+                            <div class="type-item">NULL</div>
+                            <div class="type-item">NUMERIC</div>
+                            <div class="type-item">NVARCHAR</div>
+                            <div class="type-item">OTHER</div>
+                            <div class="type-item">REAL</div>
+                            <div class="type-item">REF</div>
+                            <div class="type-item">REF_CURSOR</div>
+                            <div class="type-item">ROWID</div>
+                            <div class="type-item">SMALLINT</div>
+                            <div class="type-item">SQLXML</div>
+                            <div class="type-item">STRUCT</div>
+                            <div class="type-item">TIME</div>
+                            <div class="type-item">TIME_WITH_TIMEZONE</div>
+                            <div class="type-item">TIMESTAMP</div>
+                            <div class="type-item">TIMESTAMP_WITH_TIMEZONE</div>
+                            <div class="type-item">TINYINT</div>
+                            <div class="type-item">VARBINARY</div>
+                            <div class="type-item">VARCHAR</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /container -->
+
+        <footer>
+            ResultSetConverter v1.0 &middot; Ope Ltd
+        </footer>
+    </main>
+
+</div><!-- /page-wrapper -->
+
+<script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const toggle  = document.getElementById('sidebarToggle');
+
+    toggle.addEventListener('click', () => {
+        const collapsed = sidebar.classList.toggle('collapsed');
+        toggle.innerHTML = collapsed ? '&#x276F;' : '&#x276E;';
+    });
+
+    // Active link tracking via IntersectionObserver
+    const sections  = document.querySelectorAll('.method[id], .intro');
+    const navLinks  = document.querySelectorAll('.sidebar nav a');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(l => l.classList.remove('active'));
+                const link = document.querySelector(`.sidebar nav a[href="#${entry.target.id}"]`);
+                if (link) link.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-10% 0px -80% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
