@@ -322,9 +322,9 @@ public class ResultSetConverter {
     /**
      * Returns the first column of the first row as an int.
      * Returns 0 if the ResultSet is empty, the value is SQL NULL, the column
-     * is not an integer type, or an error occurs.
+     * is not an integer type, the value does not fit in an int, or an error occurs.
      *
-     * Accepted column types: INTEGER, SMALLINT, TINYINT.
+     * Accepted column types: INTEGER, SMALLINT, TINYINT, BIGINT.
      *
      * @param rs The ResultSet to read.
      * @return The value as an int, or 0.
@@ -340,8 +340,10 @@ public class ResultSetConverter {
                     case Types.INTEGER:
                     case Types.SMALLINT:
                     case Types.TINYINT:
-                        int val = rs.getInt(1);
-                        return rs.wasNull() ? 0 : val;
+                    case Types.BIGINT:
+                        long val = rs.getLong(1);
+                        if (rs.wasNull()) return 0;
+                        return (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) ? (int) val : 0;
                     default:
                         return 0;
                 }
@@ -357,9 +359,9 @@ public class ResultSetConverter {
     /**
      * Returns the first column of the first row as a long.
      * Returns 0 if the ResultSet is empty, the value is SQL NULL, the column
-     * is not a bigint type, or an error occurs.
+     * is not an integer type, or an error occurs.
      *
-     * Accepted column types: BIGINT.
+     * Accepted column types: BIGINT, INTEGER, SMALLINT, TINYINT.
      *
      * @param rs The ResultSet to read.
      * @return The value as a long, or 0.
@@ -373,6 +375,9 @@ public class ResultSetConverter {
                 int columnType = rs.getMetaData().getColumnType(1);
                 switch (columnType) {
                     case Types.BIGINT:
+                    case Types.INTEGER:
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
                         long val = rs.getLong(1);
                         return rs.wasNull() ? 0 : val;
                     default:
@@ -1204,7 +1209,11 @@ public class ResultSetConverter {
                     case Types.INTEGER:
                     case Types.SMALLINT:
                     case Types.TINYINT:
-                        value = rs.getInt(columnIndex);
+                        // SQLite stores up to 64 bits in any integer-affinity column and
+                        // sqlite-jdbc reports the type from the first row's value, so an
+                        // INTEGER column can still hold values beyond int range.
+                        long l = rs.getLong(columnIndex);
+                        value = (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) ? (Object) (int) l : (Object) l;
                         break;
                     case Types.BIGINT:
                         value = rs.getLong(columnIndex);
