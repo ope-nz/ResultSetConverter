@@ -180,9 +180,9 @@ Return type: @return:A JSON string in ECharts time-series format.</comment>
             <name>ToScalarInt</name>
             <comment>Returns the first column of the first row as an int.
  Returns 0 if the ResultSet is empty, the value is SQL NULL, the column
- is not an integer type, or an error occurs.
+ is not an integer type, the value does not fit in an int, or an error occurs.
 
- Accepted column types: INTEGER, SMALLINT, TINYINT.
+ Accepted column types: INTEGER, SMALLINT, TINYINT, BIGINT.
 rs: The ResultSet to read.
 Return type: @return:The value as an int, or 0.</comment>
             <returntype>int</returntype>
@@ -426,9 +426,9 @@ Return type: @return:The value as a String, or null.</comment>
             <name>ToScalarLong</name>
             <comment>Returns the first column of the first row as a long.
  Returns 0 if the ResultSet is empty, the value is SQL NULL, the column
- is not a bigint type, or an error occurs.
+ is not an integer type, or an error occurs.
 
- Accepted column types: BIGINT.
+ Accepted column types: BIGINT, INTEGER, SMALLINT, TINYINT.
 rs: The ResultSet to read.
 Return type: @return:The value as a long, or 0.</comment>
             <returntype>long</returntype>
